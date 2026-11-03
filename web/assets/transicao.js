@@ -14,7 +14,7 @@
   var veu = document.createElement('div');
   veu.id = 'veu';
   veu.setAttribute('aria-hidden', 'true');
-  veu.innerHTML = '<img src="assets/favicon.svg" alt="">';
+  veu.innerHTML = '<img src="assets/favicon.svg?v=2" alt="">';
 
   function montar() {
     document.body.appendChild(veu);
