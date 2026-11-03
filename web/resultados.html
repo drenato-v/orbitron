@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="pt-BR" data-title-en="Orbitron · Results">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbitron · Resultados</title>
+<meta name="description" content="Visualize as saídas do motor do Orbitron: erro relativo de energia e trajetórias de cada execução.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbitron">
+<meta property="og:title" content="Orbitron · Resultados das simulações">
+<meta property="og:description" content="Os números que o motor do Orbitron produz: energia e trajetórias de cada execução.">
+<meta property="og:url" content="https://drenato-v.github.io/simulador-orbital/resultados.html">
+<meta property="og:image" content="https://drenato-v.github.io/simulador-orbital/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="assets/transicao.js"></script>
+<style>
+:root{
+  --bg:#000;--bg2:#07080c;--line:rgba(255,255,255,.12);--line2:rgba(255,255,255,.22);
+  --text:#a7adbb;--strong:#fff;--muted:#6c7385;--accent:#ffd78a;
+  --sans:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  /* paleta categórica validada (modo escuro, superfície #07080c) */
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+code{font:12.5px var(--mono);color:#cfd3dc;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border:1px solid var(--strong);border-radius:999px;font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--bg);background:var(--strong);cursor:pointer;transition:.25s}
+.btn:hover{background:transparent;color:var(--strong)}
+.btn.ghost{background:transparent;color:var(--strong);border-color:var(--line2)}
+.btn.ghost:hover{border-color:var(--strong)}
+.btn svg{width:13px;height:13px}
+
+nav{position:sticky;top:0;z-index:30;background:rgba(0,0,0,.8);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
+nav .logo img{height:36px;width:auto;display:block}
+.nav-r{display:flex;align-items:center;gap:10px}
+.lang{background:transparent;border:1px solid var(--line2);color:var(--text);border-radius:999px;height:38px;min-width:46px;padding:0 12px;font:500 11px/1 var(--mono);letter-spacing:.14em;cursor:pointer}
+.lang:hover{color:var(--strong);border-color:var(--strong)}
+.navlink{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:12px 4px}
+.navlink:hover{color:var(--strong)}
+
+header{padding:80px 0 40px}
+header h1{margin:16px 0 0;font:700 clamp(40px,6vw,84px)/.95 var(--sans);letter-spacing:-.035em;text-transform:uppercase;color:var(--strong)}
+header p{max-width:640px;font-size:18px;margin:24px 0 0}
+
+.drop{margin:40px 0 0;border:1px dashed var(--line2);border-radius:14px;padding:44px 24px;text-align:center;transition:.25s;background:var(--bg2)}
+.drop.over{border-color:var(--accent);background:rgba(255,215,138,.05)}
+.drop h2{margin:0 0 14px;font:600 22px/1.2 var(--sans);color:var(--strong)}
+.drop .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center}
+.drop .ou{font:12px var(--mono);color:var(--muted);letter-spacing:.1em}
+.drop input{display:none}
+.msg{margin-top:14px;font:12px/1.6 var(--mono);color:var(--accent);min-height:1em}
+
+.fmt{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.fmt div{padding:18px 20px;border-left:1px solid var(--line)}
+.fmt div:first-child{border-left:0}
+.fmt b{display:block;color:var(--strong);font:500 13px var(--mono);margin-bottom:6px}
+.fmt span{font-size:14px;display:block}
+.fmt small{display:block;margin-top:8px;font:11px/1.5 var(--mono);color:var(--muted)}
+
+section{padding:56px 0;border-top:1px solid var(--line);margin-top:56px}
+section h2{margin:12px 0 24px;font:700 clamp(26px,3vw,38px)/1.05 var(--sans);letter-spacing:-.02em;color:var(--strong)}
+.runs{display:flex;flex-wrap:wrap;gap:10px}
+.run{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg2);font:12px/1.4 var(--mono)}
+.run i{width:12px;height:12px;border-radius:3px;flex:none}
+.run b{color:var(--strong);font-weight:500}
+.run small{color:var(--muted)}
+.run button{background:none;border:0;color:var(--muted);font:11px var(--mono);cursor:pointer;text-decoration:underline}
+.run button:hover{color:var(--strong)}
+.empty{font:13px var(--mono);color:var(--muted)}
+
+.card{border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:22px 22px 18px;margin-top:24px}
+.card .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.card h3{margin:0;font:600 18px/1.2 var(--sans);color:var(--strong)}
+.card .sub{font:12px/1.5 var(--mono);color:var(--muted);margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:none;border:0;border-left:1px solid var(--line);color:var(--text);font:11px/1 var(--mono);letter-spacing:.06em;padding:8px 10px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true]{background:rgba(255,255,255,.08);color:var(--strong)}
+.plot{position:relative}
+.plot canvas{display:block;width:100%;touch-action:none}
+.tip{position:absolute;pointer-events:none;background:rgba(10,12,18,.95);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;font:12px/1.5 var(--mono);color:var(--strong);white-space:nowrap;opacity:0;transition:opacity .12s;z-index:5}
+.tip .r{display:flex;align-items:center;gap:8px}
+.tip i{width:9px;height:9px;border-radius:2px}
+.tip .m{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font:12px var(--mono)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:14px;height:3px;border-radius:2px}
+table{width:100%;border-collapse:collapse;font:12px/1.4 var(--mono);margin-top:12px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+td{color:var(--strong);font-variant-numeric:tabular-nums}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.cfg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px}
+.cfg div{padding:12px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cfg dt{font:11px var(--mono);color:var(--muted);letter-spacing:.06em}
+.cfg dd{margin:4px 0 0;font:13px var(--mono);color:var(--strong);word-break:break-all}
+.hidden{display:none!important}
+footer{border-top:1px solid var(--line);padding:30px 0 40px;margin-top:40px;font:12px/1.6 var(--mono);color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+footer img{height:22px;width:auto}
+@media (max-width:520px){nav .btn span{display:none}nav .btn{padding:12px 14px}nav .logo img{height:28px}}
+@media (max-width:760px){.wrap{padding:0 16px}.fmt{grid-template-columns:1fr}.fmt div{border-left:0;border-top:1px solid var(--line)}.fmt div:first-child{border-top:0}.navlink{display:none}header{padding:56px 0 24px}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Página inicial"><img src="assets/orbitron.png" alt="Orbitron · Simulador Orbital"></a>
+    <div class="nav-r">
+      <a class="navlink" href="index.html">Página inicial</a>
+      <button class="lang" type="button" data-lang-toggle>EN</button>
+      <a class="btn" href="sistema-solar.html"><span>Abrir o simulador</span><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12 12 2M4.5 2H12v7.5"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">Resultados das simulações</div>
+    <h1>Os números que o motor produz.</h1>
+    <p>Carregue uma ou mais pastas de <code>results/</code> geradas pelo motor em C. Nada é calculado aqui: a página apenas lê os arquivos e desenha os gráficos.</p>
+
+    <div class="drop" id="drop">
+      <h2>Arraste pastas de execução aqui</h2>
+      <div class="row">
+        <span class="ou">ou</span>
+        <label class="btn"><input type="file" id="pick-dir" webkitdirectory directory multiple><span>Escolher pasta</span></label>
+        <label class="btn ghost"><input type="file" id="pick-files" multiple accept=".csv,.json"><span>Escolher arquivos</span></label>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+    </div>
+
+    <div class="fmt" aria-label="Formato esperado">
+      <div><b>config_usada.json</b><span>Cópia da configuração da execução</span><small>Opcional</small></div>
+      <div><b>trajetorias.csv</b><span>Posição e velocidade de cada corpo</span><small>t_dias, id, x, y, z, vx, vy, vz</small></div>
+      <div><b>energia.csv</b><span>Energia total e erro relativo</span><small>t_dias, energia, erro_relativo</small></div>
+    </div>
+  </header>
+
+  <section id="s-runs">
+    <div class="eyebrow">01</div>
+    <h2>Execuções carregadas</h2>
+    <div class="runs" id="runs"><span class="empty">Nenhuma execução carregada ainda.</span></div>
+  </section>
+
+  <section id="s-energy" class="hidden">
+    <div class="eyebrow">02</div>
+    <h2>Erro relativo de energia</h2>
+    <div class="card">
+      <div class="hd">
+        <div><h3>|ΔE / E₀|</h3><div class="sub">erro_relativo · escala log</div></div>
+        <div class="seg" role="group" aria-label="Visualização"><button type="button" data-view-e="plot" aria-pressed="true">Gráfico</button><button type="button" data-view-e="table" aria-pressed="false">Tabela</button></div>
+      </div>
+      <div class="plot" id="plot-e"><canvas id="cv-e" height="380"></canvas><div class="tip" id="tip-e"></div></div>
+      <div class="legend" id="leg-e"></div>
+      <div id="tab-e" class="hidden"></div>
+      <p class="empty hidden" id="no-e">Sem energia.csv nesta seleção.</p>
+    </div>
+  </section>
+
+  <section id="s-traj" class="hidden">
+    <div class="eyebrow">03</div>
+    <h2>Trajetórias · vista de cima</h2>
+    <div class="card">
+      <div class="hd">
+        <div><h3 id="traj-title">—</h3><div class="sub">x, y (UA) · eclíptica</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="tabs" id="traj-tabs"></div>
+          <div class="seg" role="group" aria-label="Escala radial"><button type="button" data-rs="lin" aria-pressed="false">linear</button><button type="button" data-rs="sqrt" aria-pressed="true">√r</button></div>
+        </div>
+      </div>
+      <div class="plot" id="plot-t"><canvas id="cv-t" height="560"></canvas><div class="tip" id="tip-t"></div></div>
+      <div class="legend" id="leg-t"></div>
+      <p class="empty hidden" id="no-t">Sem trajetorias.csv nesta seleção.</p>
+    </div>
+  </section>
+
+  <section id="s-cfg" class="hidden">
+    <div class="eyebrow">04</div>
+    <h2>Configuração usada</h2>
+    <div id="cfgs"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr">2026</span> Axion</span>
+    <img src="assets/axion.png" alt="Axion">
+  </div>
+</footer>
+
+<script>
+(()=>{
+'use strict';
+const T=s=>window.OrbitronI18n?OrbitronI18n.t(s):s;
+const $=s=>document.querySelector(s);
+document.getElementById('yr').textContent=new Date().getFullYear();
+const PAL=['--s1','--s2','--s3','--s4','--s5','--s6','--s7','--s8'].map(v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+// identificação dos corpos: aceita ids NAIF (199, 299…) ou nomes
+const CORPOS={10:'Sol',1:'Mercúrio',199:'Mercúrio',2:'Vênus',299:'Vênus',3:'Terra',399:'Terra',4:'Marte',499:'Marte',5:'Júpiter',599:'Júpiter',6:'Saturno',699:'Saturno',7:'Urano',799:'Urano',8:'Netuno',899:'Netuno',
+  sun:'Sol',sol:'Sol',mercury:'Mercúrio',mercurio:'Mercúrio',venus:'Vênus',earth:'Terra',terra:'Terra',mars:'Marte',marte:'Marte',jupiter:'Júpiter',saturn:'Saturno',saturno:'Saturno',uranus:'Urano',urano:'Urano',neptune:'Netuno',netuno:'Netuno'};
+const ORDEM=['Mercúrio','Vênus','Terra','Marte','Júpiter','Saturno','Urano','Netuno'];
+const nomeCorpo=id=>{const k=String(id).trim();const s=k.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');return CORPOS[k]||CORPOS[s]||k};
+const corCorpo=n=>{const i=ORDEM.indexOf(n);return i<0?(n==='Sol'?'#ffd78a':'#8a90a0'):PAL[i]};
+
+const runs=[];// {nome, cor, energia:{t,e,err}, traj:{corpo:{t,x,y}}, cfg}
+const msg=$('#msg');
+
+// ---------- leitura ----------
+function parseCSV(txt){
+  const linhas=txt.split(/\r?\n/).filter(l=>l.trim()&&!l.startsWith('#'));
+  if(!linhas.length) return {h:[],rows:[]};
+  const sep=linhas[0].includes(';')&&!linhas[0].includes(',')?';':',';
+  const h=linhas[0].split(sep).map(s=>s.trim().toLowerCase());
+  const rows=linhas.slice(1).map(l=>l.split(sep));
+  return {h,rows};
+}
+const col=(h,n)=>h.indexOf(n);
+function lerEnergia(txt){
+  const {h,rows}=parseCSV(txt),it=col(h,'t_dias'),ie=col(h,'energia'),ir=col(h,'erro_relativo');
+  if(it<0||ir<0) throw new Error('energia.csv: '+T('Colunas')+' t_dias, erro_relativo');
+  const t=[],e=[],err=[];
+  for(const r of rows){const a=+r[it],b=+r[ir];if(isFinite(a)&&isFinite(b)){t.push(a);err.push(Math.abs(b));e.push(ie>=0?+r[ie]:NaN)}}
+  return {t,e,err};
+}
+function lerTraj(txt){
+  const {h,rows}=parseCSV(txt),it=col(h,'t_dias'),id=col(h,'id'),ix=col(h,'x'),iy=col(h,'y');
+  if(it<0||id<0||ix<0||iy<0) throw new Error('trajetorias.csv: '+T('Colunas')+' t_dias, id, x, y');
+  const out={};
+  for(const r of rows){const n=nomeCorpo(r[id]);const o=out[n]||(out[n]={t:[],x:[],y:[]});o.t.push(+r[it]);o.x.push(+r[ix]);o.y.push(+r[iy])}
+  return out;
+}
+async function processar(lista){// lista: [{file, pasta}]
+  const grupos={};
+  for(const {file,pasta} of lista){(grupos[pasta||T('arquivos')]||(grupos[pasta||T('arquivos')]=[])).push(file)}
+  const ignorados=[],erros=[];let novos=0;
+  for(const [pasta,files] of Object.entries(grupos)){
+    const run={nome:pasta,cor:null,energia:null,traj:null,cfg:null};
+    for(const f of files){
+      const n=f.name.toLowerCase();
+      try{
+        if(n==='energia.csv') run.energia=lerEnergia(await f.text());
+        else if(n==='trajetorias.csv') run.traj=lerTraj(await f.text());
+        else if(n.endsWith('.json')&&/config/.test(n)) run.cfg=JSON.parse(await f.text());
+        else if(!n.startsWith('.')) ignorados.push(f.name);
+      }catch(e){erros.push(f.name+': '+e.message)}
+    }
+    if(run.energia||run.traj||run.cfg){
+      const ex=runs.findIndex(r=>r.nome===run.nome);
+      if(ex>=0){run.cor=runs[ex].cor;runs[ex]=run}else{run.cor=PAL[runs.length%PAL.length];runs.push(run);novos++}
+    }
+  }
+  msg.textContent=(erros.length?erros.join(' · ')+' ':'')+(ignorados.length?T('Arquivos não reconhecidos foram ignorados:')+' '+ignorados.slice(0,6).join(', '):'');
+  render();
+}
+function pastaDe(f){const p=(f.webkitRelativePath||f._rel||'').split('/');return p.length>1?p[p.length-2]:''}
+$('#pick-dir').addEventListener('change',e=>{processar([...e.target.files].map(f=>({file:f,pasta:pastaDe(f)})));e.target.value=''});
+$('#pick-files').addEventListener('change',e=>{processar([...e.target.files].map(f=>({file:f,pasta:''})));e.target.value=''});
+const drop=$('#drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',async e=>{
+  const itens=[...e.dataTransfer.items].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean);
+  const lista=[];
+  async function andar(ent,pasta){
+    if(ent.isFile){const f=await new Promise((ok,no)=>ent.file(ok,no));lista.push({file:f,pasta})}
+    else if(ent.isDirectory){const r=ent.createReader();let lote;do{lote=await new Promise((ok,no)=>r.readEntries(ok,no));for(const c of lote)await andar(c,ent.name)}while(lote.length)}
+  }
+  for(const it of itens) await andar(it,'');
+  if(!itens.length) [...e.dataTransfer.files].forEach(f=>lista.push({file:f,pasta:''}));
+  processar(lista);
+});
+
+// ---------- render ----------
+const fmtE=v=>v===0?'0':v.toExponential(2).replace('e','×10^').replace(/\^\+?(-?\d+)/,(m,d)=>sup(d));
+const SUPS={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup=d=>String(d).split('').map(c=>SUPS[c]||c).join('');
+const anos=d=>d/365.25;
+const nf=(v,c=2)=>v.toLocaleString(window.OrbitronI18n&&OrbitronI18n.lang==='en'?'en-US':'pt-BR',{maximumFractionDigits:c});
+
+function render(){
+  const box=$('#runs');
+  if(!runs.length){box.innerHTML='<span class="empty">'+T('Nenhuma execução carregada ainda.')+'</span>'}
+  else box.innerHTML=runs.map((r,i)=>{
+    const info=[];
+    if(r.energia&&r.energia.t.length) info.push(T('Duração')+' '+nf(anos(r.energia.t.at(-1)),1)+' '+T('anos'));
+    if(r.traj) info.push(T('Corpos')+' '+Object.keys(r.traj).length);
+    return `<div class="run"><i style="background:${r.cor}"></i><div><b>${esc(r.nome)}</b><br><small>${info.join(' · ')||'—'}</small></div><button type="button" data-rm="${i}">${T('remover')}</button></div>`}).join('')+
+    (runs.length>1?`<button class="btn ghost" type="button" id="clear">${T('Limpar tudo')}</button>`:'');
+  const comE=runs.filter(r=>r.energia&&r.energia.t.length),comT=runs.filter(r=>r.traj),comC=runs.filter(r=>r.cfg);
+  $('#s-energy').classList.toggle('hidden',!runs.length);$('#no-e').classList.toggle('hidden',!!comE.length);
+  $('#plot-e').classList.toggle('hidden',!comE.length||vistaE==='table');$('#leg-e').classList.toggle('hidden',!comE.length||vistaE==='table');
+  $('#tab-e').classList.toggle('hidden',!comE.length||vistaE!=='table');
+  $('#s-traj').classList.toggle('hidden',!runs.length);$('#no-t').classList.toggle('hidden',!!comT.length);$('#plot-t').classList.toggle('hidden',!comT.length);$('#leg-t').classList.toggle('hidden',!comT.length);
+  $('#s-cfg').classList.toggle('hidden',!comC.length);
+  if(comT.length&&!comT.includes(runT)) runT=comT[0];
+  $('#traj-tabs').innerHTML=comT.length>1?comT.map((r,i)=>`<div class="seg"><button type="button" data-rt="${runs.indexOf(r)}" aria-pressed="${r===runT}">${esc(r.nome)}</button></div>`).join(''):'';
+  $('#traj-title').textContent=runT?runT.nome:'—';
+  $('#cfgs').innerHTML=comC.map(r=>`<div class="card"><div class="hd"><h3>${esc(r.nome)}</h3></div><dl class="cfg">${Object.entries(r.cfg).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(typeof v==='object'?JSON.stringify(v):String(v))}</dd></div>`).join('')}</dl></div>`).join('');
+  desenharE();desenharT();tabelaE();
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.addEventListener('click',e=>{
+  const rm=e.target.closest('[data-rm]');if(rm){runs.splice(+rm.dataset.rm,1);runs.forEach((r,i)=>r.cor=PAL[i%PAL.length]);render()}
+  if(e.target.closest('#clear')){runs.length=0;render()}
+  const rt=e.target.closest('[data-rt]');if(rt){runT=runs[+rt.dataset.rt];render()}
+  const vs=e.target.closest('[data-view-e]');if(vs){vistaE=vs.dataset.viewE;document.querySelectorAll('[data-view-e]').forEach(b=>b.setAttribute('aria-pressed',String(b===vs)));render()}
+  const rs=e.target.closest('[data-rs]');if(rs){escalaR=rs.dataset.rs;document.querySelectorAll('[data-rs]').forEach(b=>b.setAttribute('aria-pressed',String(b===rs)));desenharT()}
+});
+let vistaE='plot',runT=null,escalaR='sqrt';
+
+// ---------- canvas util ----------
+function prep(cv){
+  const dpr=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=+cv.getAttribute('height');
+  cv.style.height=h+'px';cv.width=w*dpr;cv.height=h*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);return [x,w,h];
+}
+const INK='rgba(255,255,255,.62)',GRID='rgba(255,255,255,.07)',AX='rgba(255,255,255,.22)';
+const FONT='11px "JetBrains Mono",ui-monospace,monospace';
+
+// ---------- energia (log y) ----------
+let geoE=null;
+function desenharE(){
+  const cv=$('#cv-e');const comE=runs.filter(r=>r.energia&&r.energia.t.length);
+  if(!comE.length||vistaE==='table'){geoE=null;return}
+  const [x,W,H]=prep(cv);if(W<80){geoE=null;return}
+  const pad={l:64,r:120,t:14,b:38};
+  let tmax=0,lo=Infinity,hi=-Infinity;
+  for(const r of comE){tmax=Math.max(tmax,r.energia.t.at(-1));for(const v of r.energia.err)if(v>0){lo=Math.min(lo,v);hi=Math.max(hi,v)}}
+  if(!isFinite(lo)){lo=1e-16;hi=1e-15}
+  let y0=Math.floor(Math.log10(lo)),y1=Math.ceil(Math.log10(hi));if(y1===y0)y1++;
+  const X=t=>pad.l+(anos(t)/anos(tmax||1))*(W-pad.l-pad.r),Y=v=>{const l=v>0?Math.log10(v):y0;return pad.t+(1-(l-y0)/(y1-y0))*(H-pad.t-pad.b)};
+  x.font=FONT;x.textBaseline='middle';
+  const passoY=Math.max(1,Math.ceil((y1-y0)/7));
+  for(let k=y0;k<=y1;k+=passoY){const yy=Y(10**k);x.strokeStyle=GRID;x.lineWidth=1;x.beginPath();x.moveTo(pad.l,yy);x.lineTo(W-pad.r,yy);x.stroke();x.fillStyle=INK;x.textAlign='right';x.fillText('10'+sup(k),pad.l-10,yy)}
+  const nt=niceTicks(0,anos(tmax),6);x.textAlign='center';x.textBaseline='top';
+  for(const a of nt){const xx=X(a*365.25);x.strokeStyle=GRID;x.beginPath();x.moveTo(xx,pad.t);x.lineTo(xx,H-pad.b);x.stroke();x.fillStyle=INK;x.fillText(nf(a,1),xx,H-pad.b+10)}
+  x.strokeStyle=AX;x.beginPath();x.moveTo(pad.l,H-pad.b);x.lineTo(W-pad.r,H-pad.b);x.stroke();
+  x.fillStyle='rgba(255,255,255,.45)';x.textAlign='right';x.fillText(T('tempo (anos)'),W-pad.r,H-14);
+  const labels=[];
+  for(const r of comE){
+    const {t,err}=r.energia,n=t.length,step=Math.max(1,Math.floor(n/2000));
+    x.strokeStyle=r.cor;x.lineWidth=2;x.lineJoin='round';x.beginPath();
+    for(let i=0;i<n;i+=step){const xx=X(t[i]),yy=Y(err[i]);i?x.lineTo(xx,yy):x.moveTo(xx,yy)}
+    x.lineTo(X(t[n-1]),Y(err[n-1]));x.stroke();
+    labels.push({y:Y(err[n-1]),x:X(t[n-1]),r});
+  }
+  // rótulos diretos (até 4), sem colisão
+  if(comE.length<=4){labels.sort((a,b)=>a.y-b.y);for(let i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<16)labels[i].y=labels[i-1].y+16;
+    x.textAlign='left';x.textBaseline='middle';for(const l of labels){x.fillStyle=l.r.cor;x.beginPath();x.arc(l.x,Y(l.r.energia.err.at(-1)),3.5,0,7);x.fill();x.fillStyle='rgba(255,255,255,.85)';x.fillText(trunc(curto(l.r.nome,comE),14),l.x+10,l.y)}}
+  geoE={X,Y,pad,W,H,tmax,comE};
+  $('#leg-e').innerHTML=comE.length>=2?comE.map(r=>`<span><i style="background:${r.cor}"></i>${esc(r.nome)}</span>`).join(''):'';
+}
+const curto=(nome,lista)=>{if(lista.length<2)return nome;let k=0;const a=lista.map(r=>r.nome);while(a.every(n=>n[k]===a[0][k])&&k<nome.length)k++;while(k>0&&!/[_\-\s]/.test(nome[k-1]))k--;return nome.slice(k)||nome};
+const trunc=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+function niceTicks(a,b,n){const span=b-a||1,st=10**Math.floor(Math.log10(span/n)),err=span/n/st,m=err>=7.5?10:err>=3.5?5:err>=1.5?2:1,s=m*st,out=[];for(let v=Math.ceil(a/s)*s;v<=b+1e-9;v+=s)out.push(+v.toFixed(10));return out}
+function idxProx(arr,v){let lo=0,hi=arr.length-1;while(hi-lo>1){const m=(lo+hi)>>1;arr[m]<v?lo=m:hi=m}return Math.abs(arr[lo]-v)<Math.abs(arr[hi]-v)?lo:hi}
+const plotE=$('#plot-e'),tipE=$('#tip-e');
+plotE.addEventListener('pointermove',e=>{
+  if(!geoE)return;const b=e.currentTarget.getBoundingClientRect(),mx=e.clientX-b.left;
+  const {pad,W,tmax,comE,X,Y}=geoE;if(mx<pad.l||mx>W-pad.r){tipE.style.opacity=0;return}
+  const t=(mx-pad.l)/(W-pad.l-pad.r)*tmax;
+  desenharE();const x=$('#cv-e').getContext('2d');x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=1;x.beginPath();x.moveTo(mx,pad.t);x.lineTo(mx,geoE.H-pad.b);x.stroke();
+  let html=`<div class="m">${nf(anos(t),2)} ${T('anos')}</div>`;
+  for(const r of comE){const i=idxProx(r.energia.t,t),v=r.energia.err[i];x.fillStyle=r.cor;x.strokeStyle='#07080c';x.lineWidth=2;x.beginPath();x.arc(X(r.energia.t[i]),Y(v),4.5,0,7);x.fill();x.stroke();html+=`<div class="r"><i style="background:${r.cor}"></i>${esc(trunc(r.nome,22))}: ${fmtE(v)}</div>`}
+  tipE.innerHTML=html;tipE.style.opacity=1;const tw=tipE.offsetWidth;tipE.style.left=Math.min(mx+14,b.width-tw-4)+'px';tipE.style.top=(pad.t+6)+'px';
+});
+plotE.addEventListener('pointerleave',()=>{tipE.style.opacity=0;desenharE()});
+function tabelaE(){
+  const comE=runs.filter(r=>r.energia&&r.energia.t.length);
+  $('#tab-e').innerHTML=comE.length?`<table><thead><tr><th>${T('Execuções carregadas')}</th><th>${T('Duração')}</th><th>${T('Erro final')}</th><th>${T('Erro máximo')}</th><th>${T('pontos')}</th></tr></thead><tbody>${
+    comE.map(r=>`<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${r.cor};margin-right:8px"></span>${esc(r.nome)}</td><td>${nf(anos(r.energia.t.at(-1)),2)} ${T('anos')}</td><td>${fmtE(r.energia.err.at(-1))}</td><td>${fmtE(Math.max(...r.energia.err))}</td><td>${r.energia.t.length}</td></tr>`).join('')}</tbody></table>`:'';
+}
+
+// ---------- trajetórias (vista de cima) ----------
+let geoT=null;
+function desenharT(){
+  const cv=$('#cv-t');if(!runT||!runT.traj){geoT=null;return}
+  const [x,W,H]=prep(cv);if(W<80){geoT=null;return}const tr=runT.traj;
+  const nomes=Object.keys(tr).sort((a,b)=>(ORDEM.indexOf(a)+99*(ORDEM.indexOf(a)<0))-(ORDEM.indexOf(b)+99*(ORDEM.indexOf(b)<0)));
+  let rmax=0;for(const n of nomes){const o=tr[n];for(let i=0;i<o.x.length;i++)rmax=Math.max(rmax,Math.hypot(o.x[i],o.y[i]))}
+  rmax=rmax||1;const cx=W/2,cy=H/2,R=Math.min(W,H)/2-28;
+  const f=escalaR==='sqrt'?r=>Math.sqrt(r/rmax)*R:r=>r/rmax*R;
+  const P=(X,Y)=>{const r=Math.hypot(X,Y),k=r?f(r)/r:0;return [cx+X*k,cy-Y*k]};
+  // anéis de referência em UA
+  x.font=FONT;x.textAlign='left';x.textBaseline='bottom';
+  for(const a of [0.5,1,2,5,10,20,30,40].filter(a=>a<rmax*1.05)){const rr=f(a);x.strokeStyle=GRID;x.lineWidth=1;x.beginPath();x.arc(cx,cy,rr,0,7);x.stroke();x.fillStyle='rgba(255,255,255,.35)';x.fillText(nf(a,1)+' UA',cx+rr*0.707+4,cy-rr*0.707-2)}
+  x.fillStyle='#ffd78a';x.beginPath();x.arc(cx,cy,4,0,7);x.fill();
+  const pts=[];
+  for(const n of nomes){
+    const o=tr[n],cor=corCorpo(n),m=o.x.length,step=Math.max(1,Math.floor(m/3000));
+    if(n==='Sol')continue;
+    x.strokeStyle=cor;x.lineWidth=1.5;x.globalAlpha=.9;x.beginPath();
+    for(let i=0;i<m;i+=step){const [a,b]=P(o.x[i],o.y[i]);i?x.lineTo(a,b):x.moveTo(a,b)}
+    x.stroke();x.globalAlpha=1;
+    const [a,b]=P(o.x[m-1],o.y[m-1]);x.fillStyle=cor;x.strokeStyle='#07080c';x.lineWidth=2;x.beginPath();x.arc(a,b,4.5,0,7);x.fill();x.stroke();
+    x.fillStyle='rgba(255,255,255,.85)';x.textBaseline='middle';x.fillText(T(n),a+9,b);
+    pts.push({n,a,b,o,i:m-1});
+  }
+  geoT={P,pts,tr,nomes};
+  $('#leg-t').innerHTML=nomes.filter(n=>n!=='Sol').map(n=>`<span><i style="background:${corCorpo(n)}"></i>${esc(T(n))}</span>`).join('');
+}
+const plotT=$('#plot-t'),tipT=$('#tip-t');
+plotT.addEventListener('pointermove',e=>{
+  if(!geoT)return;const b=e.currentTarget.getBoundingClientRect(),mx=e.clientX-b.left,my=e.clientY-b.top;
+  let best=null,bd=18;
+  for(const n of geoT.nomes){if(n==='Sol')continue;const o=geoT.tr[n],m=o.x.length,step=Math.max(1,Math.floor(m/1500));
+    for(let i=0;i<m;i+=step){const [a,c]=geoT.P(o.x[i],o.y[i]),d=Math.hypot(a-mx,c-my);if(d<bd){bd=d;best={n,i,a,c,o}}}}
+  if(!best){tipT.style.opacity=0;return}
+  const {n,i,o}=best;
+  tipT.innerHTML=`<div class="r"><i style="background:${corCorpo(n)}"></i>${esc(T(n))}</div><div class="m">t = ${nf(anos(o.t[i]),2)} ${T('anos')}</div><div>x ${nf(o.x[i],4)} · y ${nf(o.y[i],4)} UA</div>`;
+  tipT.style.opacity=1;const tw=tipT.offsetWidth;tipT.style.left=Math.min(best.a+14,b.width-tw-4)+'px';tipT.style.top=Math.max(4,best.c-50)+'px';
+});
+plotT.addEventListener('pointerleave',()=>{tipT.style.opacity=0});
+
+addEventListener('resize',()=>{desenharE();desenharT()});
+document.addEventListener('orbitron:lang',render);
+render();
+})();
+</script>
+<script src="assets/i18n.js"></script>
+</body>
+</html>
