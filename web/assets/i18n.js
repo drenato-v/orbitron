@@ -17,7 +17,7 @@
     'Abrir': 'Open', 'simulador': 'simulator', 'Abrir o simulador': 'Open the simulator',
     'Voltar à página inicial': 'Back to home page', 'Página inicial': 'Home',
     'Resultados': 'Results', 'Código no GitHub': 'Code on GitHub',
-    'Português': 'Português', 'English': 'English',
+    'Português': 'Português', 'English': 'English', 'Clique para pular': 'Click to skip', 'Toque para pular': 'Tap to skip',
     'Mudar para inglês': 'Switch to Portuguese',
 
     // ---------- landing ----------
